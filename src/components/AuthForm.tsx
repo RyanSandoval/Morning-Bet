@@ -124,7 +124,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             <Input
               id="email"
               name="email"
-              type="email"
+              type="text"
               inputMode="email"
               placeholder="you@example.com"
               autoComplete={mode === 'login' ? 'username' : 'email'}
