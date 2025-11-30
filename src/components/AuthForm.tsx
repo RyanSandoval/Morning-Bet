@@ -25,9 +25,20 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
     try {
       const formData = new FormData(formRef.current!);
-      const email = formData.get('email') as string;
+      const email = (formData.get('email') as string)?.trim();
       const password = formData.get('password') as string;
-      const name = formData.get('name') as string;
+      const name = (formData.get('name') as string)?.trim();
+
+      // Manual validation (browser validation disabled for password manager compatibility)
+      if (!email || !email.includes('@')) {
+        throw new Error('Please enter a valid email address');
+      }
+      if (!password || password.length < 8) {
+        throw new Error('Password must be at least 8 characters');
+      }
+      if (mode === 'register' && (!name || name.length < 2)) {
+        throw new Error('Name must be at least 2 characters');
+      }
 
       const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
       const body = mode === 'login'
@@ -68,7 +79,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4" autoComplete="on" noValidate>
           {mode === 'register' && (
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -77,7 +88,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 name="name"
                 type="text"
                 placeholder="Your name"
-                required
                 autoComplete="name"
                 autoCapitalize="words"
                 autoCorrect="off"
@@ -93,7 +103,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
               type="email"
               inputMode="email"
               placeholder="you@example.com"
-              required
               autoComplete={mode === 'login' ? 'username' : 'email'}
               autoCapitalize="off"
               autoCorrect="off"
@@ -108,8 +117,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
               name="password"
               type="password"
               placeholder="••••••••"
-              required
-              minLength={8}
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               autoCapitalize="off"
               autoCorrect="off"
