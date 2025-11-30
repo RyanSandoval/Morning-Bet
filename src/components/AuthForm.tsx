@@ -15,32 +15,8 @@ interface AuthFormProps {
 export default function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
-  const [isGuestLoading, setIsGuestLoading] = useState(false);
   const [error, setError] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
-
-  const handleGuestLogin = async () => {
-    setIsGuestLoading(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/auth/guest', {
-        method: 'POST',
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create guest account');
-      }
-
-      router.push('/dashboard');
-      router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-      setIsGuestLoading(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -154,7 +130,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
             </div>
           )}
 
-          <Button type="submit" className="w-full" isLoading={isLoading} disabled={isGuestLoading}>
+          <Button type="submit" className="w-full" isLoading={isLoading}>
             {mode === 'login' ? 'Sign In' : 'Create Account'}
           </Button>
         </form>
@@ -168,16 +144,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
           </div>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={handleGuestLogin}
-          isLoading={isGuestLoading}
-          disabled={isLoading}
+        <Link
+          href="/guest"
+          className="flex h-10 w-full items-center justify-center rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Continue as Guest
-        </Button>
+        </Link>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {mode === 'login' ? (
