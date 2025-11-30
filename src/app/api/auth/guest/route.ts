@@ -1,50 +1,26 @@
 import { NextResponse } from 'next/server';
-import { createUser } from '@/lib/db';
-import { hashPassword, createSession } from '@/lib/auth';
+import { createSession } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    // Generate unique guest credentials
+    // Generate unique guest credentials (no database needed)
     const guestId = Math.random().toString(36).substring(2, 10);
+    const guestUserId = Math.floor(Math.random() * 1000000) + 1000000; // High ID to avoid conflicts
     const guestEmail = `guest_${guestId}@example.com`;
     const guestName = `Guest ${guestId.substring(0, 4).toUpperCase()}`;
-    const guestPassword = Math.random().toString(36).substring(2, 18);
 
-    let user;
-
-    try {
-      // Create guest user
-      const passwordHash = await hashPassword(guestPassword);
-      user = createUser(guestEmail, guestName, passwordHash);
-    } catch (dbError) {
-      // If DB fails, return specific error
-      console.error('Database error:', dbError);
-      return NextResponse.json(
-        { error: `Database error: ${dbError instanceof Error ? dbError.message : 'Unknown'}` },
-        { status: 500 }
-      );
-    }
-
-    try {
-      // Create session
-      await createSession({
-        userId: user.id,
-        email: user.email,
-        name: user.name,
-      });
-    } catch (sessionError) {
-      console.error('Session error:', sessionError);
-      return NextResponse.json(
-        { error: `Session error: ${sessionError instanceof Error ? sessionError.message : 'Unknown'}` },
-        { status: 500 }
-      );
-    }
+    // Create session directly (bypasses database for demo)
+    await createSession({
+      userId: guestUserId,
+      email: guestEmail,
+      name: guestName,
+    });
 
     return NextResponse.json({
       user: {
-        id: user.id,
-        email: user.email,
-        name: user.name,
+        id: guestUserId,
+        email: guestEmail,
+        name: guestName,
       },
     });
   } catch (error) {
