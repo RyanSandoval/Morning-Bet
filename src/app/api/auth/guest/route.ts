@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { createUser } from '@/lib/db';
 import { hashPassword, createSession } from '@/lib/auth';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
     // Generate unique guest credentials
     const guestId = Math.random().toString(36).substring(2, 10);
