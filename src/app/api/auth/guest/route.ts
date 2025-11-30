@@ -1,26 +1,31 @@
 import { NextResponse } from 'next/server';
-import { createSession } from '@/lib/auth';
+import { createUser } from '@/lib/supabase';
+import { hashPassword, createSession } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
-    // Generate unique guest credentials (no database needed)
+    // Generate unique guest credentials
     const guestId = Math.random().toString(36).substring(2, 10);
-    const guestUserId = Math.floor(Math.random() * 1000000) + 1000000; // High ID to avoid conflicts
     const guestEmail = `guest_${guestId}@example.com`;
     const guestName = `Guest ${guestId.substring(0, 4).toUpperCase()}`;
+    const guestPassword = Math.random().toString(36).substring(2, 18);
 
-    // Create session directly (bypasses database for demo)
+    // Create real user in Supabase
+    const passwordHash = await hashPassword(guestPassword);
+    const user = await createUser(guestEmail, guestName, passwordHash);
+
+    // Create session
     await createSession({
-      userId: guestUserId,
-      email: guestEmail,
-      name: guestName,
+      userId: user.id,
+      email: user.email,
+      name: user.name,
     });
 
     return NextResponse.json({
       user: {
-        id: guestUserId,
-        email: guestEmail,
-        name: guestName,
+        id: user.id,
+        email: user.email,
+        name: user.name,
       },
     });
   } catch (error) {
