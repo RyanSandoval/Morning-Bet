@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import ActiveBetCard from '@/components/ActiveBetCard';
 import BetCreationForm from '@/components/BetCreationForm';
 import BetHistory from '@/components/BetHistory';
-import { Moon, Sun } from 'lucide-react';
+import DashboardGreeting from '@/components/DashboardGreeting';
 
 export default async function Dashboard() {
   const session = await getSession();
@@ -34,11 +34,6 @@ export default async function Dashboard() {
   const activeBet = await getActiveBetForUser(session.userId).catch(() => null);
   const allBets = await getBetsForUser(session.userId).catch(() => []);
 
-  // Determine if it's morning (time to complete tasks) or evening (time to create bet)
-  const hour = new Date().getHours();
-  const isMorning = hour >= 5 && hour < 12;
-  const isEvening = hour >= 18 || hour < 5;
-
   // Past bets (completed ones)
   const pastBets = allBets.filter(b => b.status !== 'pending');
 
@@ -47,30 +42,7 @@ export default async function Dashboard() {
       <Header user={user} />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* Time-based greeting */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2 mb-2">
-            {isMorning ? (
-              <Sun className="w-6 h-6 text-primary" />
-            ) : (
-              <Moon className="w-6 h-6 text-primary" />
-            )}
-            <h1 className="text-2xl font-bold text-foreground">
-              {isMorning
-                ? 'Good morning! Time to crush it.'
-                : isEvening
-                ? 'Good evening! Ready to plan tomorrow?'
-                : `Hey ${user?.name.split(' ')[0]}!`}
-            </h1>
-          </div>
-          <p className="text-muted-foreground">
-            {activeBet
-              ? 'You have an active bet. Complete your tasks before the deadline!'
-              : isMorning
-              ? 'No active bet. Create one tonight to stay accountable tomorrow.'
-              : 'Set your tasks for tomorrow and put some money on the line.'}
-          </p>
-        </div>
+        <DashboardGreeting userName={user.name} hasActiveBet={!!activeBet} />
 
         {/* Main Content */}
         <div className="space-y-8">
