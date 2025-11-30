@@ -79,6 +79,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 onChange={(e) => setName(e.target.value)}
                 required
                 autoComplete="name"
+                autoCapitalize="words"
+                autoCorrect="off"
               />
             </div>
           )}
@@ -89,11 +91,15 @@ export default function AuthForm({ mode }: AuthFormProps) {
               id="email"
               name="email"
               type="email"
+              inputMode="email"
               placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete={mode === 'login' ? 'username' : 'email'}
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck="false"
             />
           </div>
 
@@ -109,6 +115,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
               required
               minLength={8}
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck="false"
             />
           </div>
 

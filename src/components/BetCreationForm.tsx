@@ -225,9 +225,12 @@ export default function BetCreationForm() {
                   <Label htmlFor="charity">Charity/Organization Name</Label>
                   <Input
                     id="charity"
+                    name="charity"
+                    type="text"
                     placeholder="Enter the organization name..."
                     value={consequenceTarget}
                     onChange={(e) => setConsequenceTarget(e.target.value)}
+                    autoComplete="organization"
                   />
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -249,11 +252,16 @@ export default function BetCreationForm() {
                   <Label htmlFor="friendEmail">Friend&apos;s Email</Label>
                   <Input
                     id="friendEmail"
+                    name="friendEmail"
                     type="email"
+                    inputMode="email"
                     placeholder="friend@example.com"
                     value={consequenceTarget}
                     onChange={(e) => setConsequenceTarget(e.target.value)}
                     autoComplete="email"
+                    autoCapitalize="off"
+                    autoCorrect="off"
+                    spellCheck="false"
                   />
                 </div>
                 <div className="space-y-2">
