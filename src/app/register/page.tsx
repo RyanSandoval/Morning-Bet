@@ -11,9 +11,9 @@ export default async function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header />
-      <main className="max-w-4xl mx-auto px-4 py-16">
+      <main className="flex-1 flex items-center justify-center px-4 py-8">
         <AuthForm mode="register" />
       </main>
     </div>

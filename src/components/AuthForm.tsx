@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const formRef = useRef<HTMLFormElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +24,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setError('');
 
     try {
+      const formData = new FormData(formRef.current!);
+      const email = formData.get('email') as string;
+      const password = formData.get('password') as string;
+      const name = formData.get('name') as string;
+
       const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
       const body = mode === 'login'
         ? { email, password }
@@ -66,7 +68,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
+        <form ref={formRef} onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
           {mode === 'register' && (
             <div className="space-y-2">
               <Label htmlFor="name">Name</Label>
@@ -75,8 +77,6 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 name="name"
                 type="text"
                 placeholder="Your name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
                 required
                 autoComplete="name"
                 autoCapitalize="words"
@@ -93,13 +93,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
               type="email"
               inputMode="email"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete={mode === 'login' ? 'username' : 'email'}
               autoCapitalize="off"
               autoCorrect="off"
-              spellCheck="false"
+              spellCheck={false}
             />
           </div>
 
@@ -110,14 +108,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
               name="password"
               type="password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
               autoCapitalize="off"
               autoCorrect="off"
-              spellCheck="false"
+              spellCheck={false}
             />
           </div>
 
