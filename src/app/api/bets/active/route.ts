@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-import { getActiveBetForUser } from '@/lib/db';
+import { getActiveBetForUser } from '@/lib/supabase';
 
 export async function GET() {
   try {
@@ -9,7 +9,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const bet = getActiveBetForUser(session.userId);
+    const bet = await getActiveBetForUser(session.userId);
     return NextResponse.json({ bet: bet || null });
   } catch (error) {
     console.error('Get active bet error:', error);

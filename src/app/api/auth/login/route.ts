@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getUserByEmail } from '@/lib/db';
+import { getUserByEmail } from '@/lib/supabase';
 import { verifyPassword, createSession } from '@/lib/auth';
 import { z } from 'zod';
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     const { email, password } = result.data;
 
     // Find user
-    const user = getUserByEmail(email);
+    const user = await getUserByEmail(email);
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid email or password' },

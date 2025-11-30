@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSession } from '@/lib/auth';
-import { completeTask, getTaskById, getBetById, updateBetStatus } from '@/lib/db';
+import { completeTask, getTaskById, getBetById, updateBetStatus } from '@/lib/supabase';
 import { z } from 'zod';
 
 const completeTaskSchema = z.object({
@@ -27,12 +27,12 @@ export async function POST(request: Request) {
     const { taskId } = result.data;
 
     // Get the task and verify ownership
-    const task = getTaskById(taskId);
+    const task = await getTaskById(taskId);
     if (!task) {
       return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
-    const bet = getBetById(task.bet_id);
+    const bet = await getBetById(task.bet_id);
     if (!bet || bet.user_id !== session.userId) {
       return NextResponse.json({ error: 'Task not found' }, { status: 404 });
     }
@@ -54,20 +54,20 @@ export async function POST(request: Request) {
     }
 
     // Complete the task
-    const updatedTask = completeTask(taskId);
+    const updatedTask = await completeTask(taskId);
 
     // Check if all tasks are now complete
-    const updatedBet = getBetById(bet.id)!;
-    const allComplete = updatedBet.tasks.every(t => t.completed);
+    const updatedBet = await getBetById(bet.id);
+    const allComplete = updatedBet?.tasks.every(t => t.completed) || false;
 
     if (allComplete) {
       // User won! Mark bet as won
-      updateBetStatus(bet.id, 'won');
+      await updateBetStatus(bet.id, 'won');
     }
 
     return NextResponse.json({
       task: updatedTask,
-      bet: getBetById(bet.id),
+      bet: await getBetById(bet.id),
       allComplete,
     });
   } catch (error) {

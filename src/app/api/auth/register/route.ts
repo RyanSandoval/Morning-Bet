@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { createUser, getUserByEmail } from '@/lib/db';
+import { createUser, getUserByEmail } from '@/lib/supabase';
 import { hashPassword, createSession } from '@/lib/auth';
 import { z } from 'zod';
 
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const { email, name, password } = result.data;
 
     // Check if user already exists
-    const existingUser = getUserByEmail(email);
+    const existingUser = await getUserByEmail(email);
     if (existingUser) {
       return NextResponse.json(
         { error: 'An account with this email already exists' },
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     // Hash password and create user
     const passwordHash = await hashPassword(password);
-    const user = createUser(email, name, passwordHash);
+    const user = await createUser(email, name, passwordHash);
 
     // Create session
     await createSession({
