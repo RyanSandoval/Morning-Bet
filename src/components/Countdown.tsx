@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { differenceInSeconds, differenceInMinutes, differenceInHours } from 'date-fns';
+import { differenceInSeconds } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface CountdownProps {
   deadline: string;
@@ -43,22 +44,22 @@ export default function Countdown({ deadline, onExpire }: CountdownProps) {
   if (isExpired) {
     return (
       <div className="text-center">
-        <p className="text-2xl font-bold text-red-500">Time's Up!</p>
+        <p className="text-2xl font-bold text-destructive">Time&apos;s Up!</p>
       </div>
     );
   }
 
-  const urgencyColor =
+  const urgencyClass =
     timeLeft.hours === 0 && timeLeft.minutes < 30
-      ? 'text-red-500'
+      ? 'text-destructive'
       : timeLeft.hours < 2
-      ? 'text-orange-500'
-      : 'text-gray-800';
+      ? 'text-primary'
+      : 'text-foreground';
 
   return (
     <div className="text-center">
-      <p className="text-sm text-gray-500 mb-1">Time remaining</p>
-      <div className={`text-4xl font-mono font-bold ${urgencyColor}`}>
+      <p className="text-sm text-muted-foreground mb-1">Time remaining</p>
+      <div className={cn("text-4xl font-mono font-bold", urgencyClass)}>
         {String(timeLeft.hours).padStart(2, '0')}:
         {String(timeLeft.minutes).padStart(2, '0')}:
         {String(timeLeft.seconds).padStart(2, '0')}

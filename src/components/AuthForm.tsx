@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Button from './Button';
-import Input from './Input';
-import Card from './Card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface AuthFormProps {
   mode: 'login' | 'register';
@@ -54,69 +55,92 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <Card className="w-full max-w-md mx-auto">
-      <h2 className="text-2xl font-bold text-center mb-6">
-        {mode === 'login' ? 'Welcome Back' : 'Create Account'}
-      </h2>
+      <CardHeader className="text-center">
+        <CardTitle className="text-2xl">
+          {mode === 'login' ? 'Welcome Back' : 'Create Account'}
+        </CardTitle>
+        <CardDescription>
+          {mode === 'login'
+            ? 'Sign in to your account to continue'
+            : 'Get started with Morning Bet'}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
+          {mode === 'register' && (
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                name="name"
+                type="text"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                autoComplete="name"
+              />
+            </div>
+          )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {mode === 'register' && (
-          <Input
-            label="Name"
-            type="text"
-            placeholder="Your name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        )}
-
-        <Input
-          label="Email"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-
-        <Input
-          label="Password"
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-        />
-
-        {error && (
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-            {error}
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete={mode === 'login' ? 'username' : 'email'}
+            />
           </div>
-        )}
 
-        <Button type="submit" className="w-full" isLoading={isLoading}>
-          {mode === 'login' ? 'Sign In' : 'Create Account'}
-        </Button>
-      </form>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+              autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+            />
+          </div>
 
-      <p className="mt-6 text-center text-sm text-gray-600">
-        {mode === 'login' ? (
-          <>
-            Don't have an account?{' '}
-            <Link href="/register" className="text-orange-500 hover:text-orange-600 font-medium">
-              Sign up
-            </Link>
-          </>
-        ) : (
-          <>
-            Already have an account?{' '}
-            <Link href="/login" className="text-orange-500 hover:text-orange-600 font-medium">
-              Sign in
-            </Link>
-          </>
-        )}
-      </p>
+          {error && (
+            <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
+              {error}
+            </div>
+          )}
+
+          <Button type="submit" className="w-full" isLoading={isLoading}>
+            {mode === 'login' ? 'Sign In' : 'Create Account'}
+          </Button>
+        </form>
+
+        <p className="mt-6 text-center text-sm text-muted-foreground">
+          {mode === 'login' ? (
+            <>
+              Don&apos;t have an account?{' '}
+              <Link href="/register" className="text-primary hover:text-primary/80 font-medium">
+                Sign up
+              </Link>
+            </>
+          ) : (
+            <>
+              Already have an account?{' '}
+              <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
+                Sign in
+              </Link>
+            </>
+          )}
+        </p>
+      </CardContent>
     </Card>
   );
 }

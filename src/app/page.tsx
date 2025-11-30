@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
 import Header from '@/components/Header';
-import Button from '@/components/Button';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Target, DollarSign, Clock, Flame, CheckCircle, ArrowRight } from 'lucide-react';
 
 export default async function Home() {
@@ -13,16 +14,16 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
 
       {/* Hero Section */}
       <section className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <h1 className="text-5xl font-bold text-gray-900 mb-6">
+        <h1 className="text-5xl font-bold text-foreground mb-6">
           Stop Ignoring Your<br />
-          <span className="text-orange-500">Morning Plans</span>
+          <span className="text-primary">Morning Plans</span>
         </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
           You plan the night before but wake up and ignore your own plan.
           Morning Bet puts real money on the line so you actually follow through.
         </p>
@@ -35,34 +36,34 @@ export default async function Home() {
       </section>
 
       {/* How it Works */}
-      <section className="bg-white py-16 border-t border-b border-gray-200">
+      <section className="bg-card py-16 border-t border-b border-border">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
+          <h2 className="text-3xl font-bold text-center text-foreground mb-12">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
-                <Target className="w-8 h-8 text-orange-500" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <Target className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="font-bold text-lg mb-2">1. Set Your Tasks</h3>
-              <p className="text-gray-600">
+              <h3 className="font-bold text-lg text-foreground mb-2">1. Set Your Tasks</h3>
+              <p className="text-muted-foreground">
                 Every night, choose your top 3 tasks for tomorrow morning.
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
-                <DollarSign className="w-8 h-8 text-orange-500" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <DollarSign className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="font-bold text-lg mb-2">2. Stake Your Money</h3>
-              <p className="text-gray-600">
+              <h3 className="font-bold text-lg text-foreground mb-2">2. Stake Your Money</h3>
+              <p className="text-muted-foreground">
                 Put $5-$20 on the line. Real stakes = real motivation.
               </p>
             </div>
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-orange-100 flex items-center justify-center">
-                <Clock className="w-8 h-8 text-orange-500" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                <Clock className="w-8 h-8 text-primary" />
               </div>
-              <h3 className="font-bold text-lg mb-2">3. Beat the Clock</h3>
-              <p className="text-gray-600">
+              <h3 className="font-bold text-lg text-foreground mb-2">3. Beat the Clock</h3>
+              <p className="text-muted-foreground">
                 Complete all 3 tasks by noon, or lose your money.
               </p>
             </div>
@@ -71,57 +72,61 @@ export default async function Home() {
       </section>
 
       {/* Consequences */}
-      <section className="py-16">
+      <section className="py-16 bg-background">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-4">The Stakes Are Real</h2>
-          <p className="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-center text-foreground mb-4">The Stakes Are Real</h2>
+          <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
             If you fail, your money goes somewhere that will really sting.
           </p>
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="p-6 rounded-xl border-2 border-red-200 bg-red-50">
-              <div className="flex items-center gap-3 mb-4">
-                <Flame className="w-8 h-8 text-red-500" />
-                <h3 className="font-bold text-lg">Charity You Hate</h3>
-              </div>
-              <p className="text-gray-700">
-                Your money goes to a cause you cannot stand. The NRA, flat earth society,
-                your rival sports team foundation... whatever makes you cringe.
-              </p>
-            </div>
-            <div className="p-6 rounded-xl border-2 border-orange-200 bg-orange-50">
-              <div className="flex items-center gap-3 mb-4">
-                <Flame className="w-8 h-8 text-orange-500" />
-                <h3 className="font-bold text-lg">Friend Who Will Roast You</h3>
-              </div>
-              <p className="text-gray-700">
-                Pick a friend who will receive your money AND permission to roast you
-                mercilessly. They will make sure you never forget your failure.
-              </p>
-            </div>
+            <Card variant="destructive">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Flame className="w-8 h-8 text-destructive" />
+                  <h3 className="font-bold text-lg text-foreground">Charity You Hate</h3>
+                </div>
+                <p className="text-muted-foreground">
+                  Your money goes to a cause you cannot stand. The NRA, flat earth society,
+                  your rival sports team foundation... whatever makes you cringe.
+                </p>
+              </CardContent>
+            </Card>
+            <Card variant="highlight">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Flame className="w-8 h-8 text-primary" />
+                  <h3 className="font-bold text-lg text-foreground">Friend Who Will Roast You</h3>
+                </div>
+                <p className="text-muted-foreground">
+                  Pick a friend who will receive your money AND permission to roast you
+                  mercilessly. They will make sure you never forget your failure.
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       {/* Social Proof */}
-      <section className="bg-white py-16 border-t border-gray-200">
+      <section className="bg-card py-16 border-t border-border">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-8">Why It Works</h2>
+          <h2 className="text-3xl font-bold text-foreground mb-8">Why It Works</h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="p-6">
-              <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-4" />
-              <p className="text-gray-700 font-medium">
+              <CheckCircle className="w-8 h-8 text-success mx-auto mb-4" />
+              <p className="text-muted-foreground font-medium">
                 &quot;I have tried every productivity app. This is the only thing that actually works.&quot;
               </p>
             </div>
             <div className="p-6">
-              <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-4" />
-              <p className="text-gray-700 font-medium">
+              <CheckCircle className="w-8 h-8 text-success mx-auto mb-4" />
+              <p className="text-muted-foreground font-medium">
                 &quot;The fear of funding my annoying cousin&apos;s business is incredibly motivating.&quot;
               </p>
             </div>
             <div className="p-6">
-              <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-4" />
-              <p className="text-gray-700 font-medium">
+              <CheckCircle className="w-8 h-8 text-success mx-auto mb-4" />
+              <p className="text-muted-foreground font-medium">
                 &quot;10 day streak and counting. Have not lost a bet yet!&quot;
               </p>
             </div>
@@ -130,10 +135,10 @@ export default async function Home() {
       </section>
 
       {/* CTA */}
-      <section className="py-16">
+      <section className="py-16 bg-background">
         <div className="max-w-4xl mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Actually Get Things Done?</h2>
-          <p className="text-gray-600 mb-8">
+          <h2 className="text-3xl font-bold text-foreground mb-4">Ready to Actually Get Things Done?</h2>
+          <p className="text-muted-foreground mb-8">
             Start tonight. Set your first bet. Win tomorrow.
           </p>
           <Link href="/register">
@@ -145,8 +150,8 @@ export default async function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-8">
-        <div className="max-w-4xl mx-auto px-4 text-center text-sm text-gray-500">
+      <footer className="border-t border-border py-8 bg-card">
+        <div className="max-w-4xl mx-auto px-4 text-center text-sm text-muted-foreground">
           <p>Morning Bet - Put your money where your mouth is.</p>
         </div>
       </footer>

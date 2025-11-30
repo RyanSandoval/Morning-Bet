@@ -1,8 +1,9 @@
 'use client';
 
 import { format } from 'date-fns';
-import Card from './Card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Flame, Clock } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { BetWithTasks } from '@/types';
 
 interface BetHistoryProps {
@@ -13,9 +14,11 @@ export default function BetHistory({ bets }: BetHistoryProps) {
   if (bets.length === 0) {
     return (
       <Card>
-        <p className="text-center text-gray-500 py-8">
-          No bet history yet. Create your first bet tonight!
-        </p>
+        <CardContent className="py-8">
+          <p className="text-center text-muted-foreground">
+            No bet history yet. Create your first bet tonight!
+          </p>
+        </CardContent>
       </Card>
     );
   }
@@ -33,71 +36,84 @@ export default function BetHistory({ bets }: BetHistoryProps) {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="text-center">
-          <p className="text-3xl font-bold text-gray-800">{stats.total}</p>
-          <p className="text-sm text-gray-500">Total Bets</p>
+          <CardContent className="pt-6">
+            <p className="text-3xl font-bold text-foreground">{stats.total}</p>
+            <p className="text-sm text-muted-foreground">Total Bets</p>
+          </CardContent>
         </Card>
         <Card className="text-center" variant="success">
-          <p className="text-3xl font-bold text-green-700">{stats.won}</p>
-          <p className="text-sm text-green-600">Won</p>
+          <CardContent className="pt-6">
+            <p className="text-3xl font-bold text-success">{stats.won}</p>
+            <p className="text-sm text-success/80">Won</p>
+          </CardContent>
         </Card>
-        <Card className="text-center" variant="danger">
-          <p className="text-3xl font-bold text-red-700">{stats.lost}</p>
-          <p className="text-sm text-red-600">Lost</p>
+        <Card className="text-center" variant="destructive">
+          <CardContent className="pt-6">
+            <p className="text-3xl font-bold text-destructive">{stats.lost}</p>
+            <p className="text-sm text-destructive/80">Lost</p>
+          </CardContent>
         </Card>
         <Card className="text-center">
-          <p className="text-3xl font-bold text-orange-600">${stats.moneySaved}</p>
-          <p className="text-sm text-gray-500">Saved</p>
+          <CardContent className="pt-6">
+            <p className="text-3xl font-bold text-primary">${stats.moneySaved}</p>
+            <p className="text-sm text-muted-foreground">Saved</p>
+          </CardContent>
         </Card>
       </div>
 
       {/* History List */}
       <Card>
-        <h3 className="font-bold text-lg mb-4">Recent Bets</h3>
-        <div className="space-y-4">
-          {bets.slice(0, 10).map((bet) => (
-            <div
-              key={bet.id}
-              className={`p-4 rounded-lg border ${
-                bet.status === 'won'
-                  ? 'bg-green-50 border-green-200'
-                  : bet.status === 'lost'
-                  ? 'bg-red-50 border-red-200'
-                  : 'bg-gray-50 border-gray-200'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                  {bet.status === 'won' ? (
-                    <Trophy className="w-5 h-5 text-green-600" />
-                  ) : bet.status === 'lost' ? (
-                    <Flame className="w-5 h-5 text-red-600" />
-                  ) : (
-                    <Clock className="w-5 h-5 text-gray-500" />
-                  )}
-                  <span className="font-medium">
-                    ${bet.amount / 100} - {bet.status.toUpperCase()}
+        <CardHeader>
+          <CardTitle>Recent Bets</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {bets.slice(0, 10).map((bet) => (
+              <div
+                key={bet.id}
+                className={cn(
+                  "p-4 rounded-lg border",
+                  bet.status === 'won'
+                    ? 'bg-success/10 border-success/30'
+                    : bet.status === 'lost'
+                    ? 'bg-destructive/10 border-destructive/30'
+                    : 'bg-muted/50 border-border'
+                )}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    {bet.status === 'won' ? (
+                      <Trophy className="w-5 h-5 text-success" />
+                    ) : bet.status === 'lost' ? (
+                      <Flame className="w-5 h-5 text-destructive" />
+                    ) : (
+                      <Clock className="w-5 h-5 text-muted-foreground" />
+                    )}
+                    <span className="font-medium text-foreground">
+                      ${bet.amount / 100} - {bet.status.toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {format(new Date(bet.created_at), 'MMM d, yyyy')}
                   </span>
                 </div>
-                <span className="text-sm text-gray-500">
-                  {format(new Date(bet.created_at), 'MMM d, yyyy')}
-                </span>
+                <div className="text-sm text-muted-foreground">
+                  {bet.tasks.map((task, i) => (
+                    <span key={task.id}>
+                      {task.completed ? '✓' : '✗'} {task.title}
+                      {i < 2 ? ' • ' : ''}
+                    </span>
+                  ))}
+                </div>
+                {bet.status === 'lost' && (
+                  <p className="text-sm text-destructive mt-2">
+                    Sent to: {bet.consequence_target}
+                  </p>
+                )}
               </div>
-              <div className="text-sm text-gray-600">
-                {bet.tasks.map((task, i) => (
-                  <span key={task.id}>
-                    {task.completed ? '✓' : '✗'} {task.title}
-                    {i < 2 ? ' • ' : ''}
-                  </span>
-                ))}
-              </div>
-              {bet.status === 'lost' && (
-                <p className="text-sm text-red-600 mt-2">
-                  Sent to: {bet.consequence_target}
-                </p>
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        </CardContent>
       </Card>
     </div>
   );

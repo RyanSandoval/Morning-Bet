@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Check, Circle, Loader2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import type { Task } from '@/types';
 
 interface TaskItemProps {
@@ -26,37 +27,41 @@ export default function TaskItem({ task, onComplete, disabled }: TaskItemProps) 
 
   return (
     <div
-      className={`flex items-center gap-3 p-4 rounded-lg border transition-all ${
+      className={cn(
+        "flex items-center gap-3 p-4 rounded-lg border transition-all",
         task.completed
-          ? 'bg-green-50 border-green-200'
-          : 'bg-white border-gray-200 hover:border-orange-300'
-      } ${!task.completed && !disabled ? 'cursor-pointer' : ''}`}
+          ? 'bg-success/10 border-success/30'
+          : 'bg-card border-border hover:border-primary/50',
+        !task.completed && !disabled && 'cursor-pointer'
+      )}
       onClick={handleComplete}
     >
       <div
-        className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center ${
+        className={cn(
+          "flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center",
           task.completed
-            ? 'bg-green-500 text-white'
-            : 'border-2 border-gray-300'
-        }`}
+            ? 'bg-success text-success-foreground'
+            : 'border-2 border-muted-foreground/30'
+        )}
       >
         {isLoading ? (
-          <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
+          <Loader2 className="w-4 h-4 animate-spin text-primary" />
         ) : task.completed ? (
           <Check className="w-4 h-4" />
         ) : (
-          <Circle className="w-4 h-4 text-gray-300" />
+          <Circle className="w-4 h-4 text-muted-foreground/30" />
         )}
       </div>
       <span
-        className={`flex-1 ${
-          task.completed ? 'text-green-700 line-through' : 'text-gray-800'
-        }`}
+        className={cn(
+          "flex-1",
+          task.completed ? 'text-success line-through' : 'text-foreground'
+        )}
       >
         {task.title}
       </span>
       {task.completed && task.completed_at && (
-        <span className="text-xs text-green-600">
+        <span className="text-xs text-success">
           {new Date(task.completed_at).toLocaleTimeString()}
         </span>
       )}

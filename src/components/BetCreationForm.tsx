@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Button from './Button';
-import Input from './Input';
-import Card from './Card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { DollarSign, Target, AlertTriangle, User, Building } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const SUGGESTED_CHARITIES = [
   'Political party you oppose',
@@ -20,7 +23,6 @@ export default function BetCreationForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Form state
   const [amount, setAmount] = useState(10);
   const [tasks, setTasks] = useState(['', '', '']);
   const [consequenceType, setConsequenceType] = useState<'charity' | 'friend'>('charity');
@@ -85,9 +87,10 @@ export default function BetCreationForm() {
         {[1, 2, 3].map((s) => (
           <div
             key={s}
-            className={`w-3 h-3 rounded-full transition-colors ${
-              s === step ? 'bg-orange-500' : s < step ? 'bg-green-500' : 'bg-gray-300'
-            }`}
+            className={cn(
+              "w-3 h-3 rounded-full transition-colors",
+              s === step ? 'bg-primary' : s < step ? 'bg-success' : 'bg-muted'
+            )}
           />
         ))}
       </div>
@@ -95,190 +98,213 @@ export default function BetCreationForm() {
       {/* Step 1: Amount */}
       {step === 1 && (
         <Card className="animate-fadeIn">
-          <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="w-6 h-6 text-orange-500" />
-            <h2 className="text-xl font-bold">Set Your Stakes</h2>
-          </div>
-          <p className="text-gray-600 mb-6">
-            How much are you willing to bet on yourself? This money will be charged if you don't complete your tasks by noon.
-          </p>
-
-          <div className="space-y-4">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <DollarSign className="w-6 h-6 text-primary" />
+              <CardTitle>Set Your Stakes</CardTitle>
+            </div>
+            <CardDescription>
+              How much are you willing to bet on yourself? This money will be charged if you don&apos;t complete your tasks by noon.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
             <div className="flex items-center justify-center gap-4">
               {[5, 10, 15, 20].map((val) => (
                 <button
                   key={val}
                   onClick={() => setAmount(val)}
-                  className={`w-16 h-16 rounded-xl font-bold text-lg transition-all ${
+                  className={cn(
+                    "w-16 h-16 rounded-xl font-bold text-lg transition-all",
                     amount === val
-                      ? 'bg-orange-500 text-white scale-110'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                      ? 'bg-primary text-primary-foreground scale-110'
+                      : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  )}
                 >
                   ${val}
                 </button>
               ))}
             </div>
 
-            <p className="text-center text-sm text-gray-500">
+            <p className="text-center text-sm text-muted-foreground">
               Choose between $5 and $20
             </p>
-          </div>
 
-          <div className="mt-8 flex justify-end">
-            <Button onClick={() => setStep(2)} disabled={!canProceed()}>
-              Next: Set Tasks
-            </Button>
-          </div>
+            <div className="flex justify-end">
+              <Button onClick={() => setStep(2)} disabled={!canProceed()}>
+                Next: Set Tasks
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       )}
 
       {/* Step 2: Tasks */}
       {step === 2 && (
         <Card className="animate-fadeIn">
-          <div className="flex items-center gap-2 mb-4">
-            <Target className="w-6 h-6 text-orange-500" />
-            <h2 className="text-xl font-bold">Your Top 3 Tasks</h2>
-          </div>
-          <p className="text-gray-600 mb-6">
-            What do you want to accomplish by noon tomorrow? Be specific!
-          </p>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Target className="w-6 h-6 text-primary" />
+              <CardTitle>Your Top 3 Tasks</CardTitle>
+            </div>
+            <CardDescription>
+              What do you want to accomplish by noon tomorrow? Be specific!
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-4">
+              {tasks.map((task, index) => (
+                <div key={index} className="flex items-center gap-3">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm">
+                    {index + 1}
+                  </span>
+                  <Input
+                    placeholder={`Task ${index + 1}...`}
+                    value={task}
+                    onChange={(e) => updateTask(index, e.target.value)}
+                  />
+                </div>
+              ))}
+            </div>
 
-          <div className="space-y-4">
-            {tasks.map((task, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
-                  {index + 1}
-                </span>
-                <Input
-                  placeholder={`Task ${index + 1}...`}
-                  value={task}
-                  onChange={(e) => updateTask(index, e.target.value)}
-                />
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-8 flex justify-between">
-            <Button variant="ghost" onClick={() => setStep(1)}>
-              Back
-            </Button>
-            <Button onClick={() => setStep(3)} disabled={!canProceed()}>
-              Next: Set Consequence
-            </Button>
-          </div>
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={() => setStep(1)}>
+                Back
+              </Button>
+              <Button onClick={() => setStep(3)} disabled={!canProceed()}>
+                Next: Set Consequence
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       )}
 
       {/* Step 3: Consequence */}
       {step === 3 && (
         <Card className="animate-fadeIn">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle className="w-6 h-6 text-orange-500" />
-            <h2 className="text-xl font-bold">Set Your Consequence</h2>
-          </div>
-          <p className="text-gray-600 mb-6">
-            Where should your money go if you fail? Pick something that will REALLY motivate you!
-          </p>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-6 h-6 text-primary" />
+              <CardTitle>Set Your Consequence</CardTitle>
+            </div>
+            <CardDescription>
+              Where should your money go if you fail? Pick something that will REALLY motivate you!
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Consequence Type Toggle */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => setConsequenceType('charity')}
+                className={cn(
+                  "flex-1 p-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2",
+                  consequenceType === 'charity'
+                    ? 'border-primary bg-primary/10 text-foreground'
+                    : 'border-border hover:border-border/80 text-muted-foreground'
+                )}
+              >
+                <Building className="w-5 h-5" />
+                Charity You Hate
+              </button>
+              <button
+                onClick={() => setConsequenceType('friend')}
+                className={cn(
+                  "flex-1 p-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2",
+                  consequenceType === 'friend'
+                    ? 'border-primary bg-primary/10 text-foreground'
+                    : 'border-border hover:border-border/80 text-muted-foreground'
+                )}
+              >
+                <User className="w-5 h-5" />
+                Friend Who&apos;ll Roast You
+              </button>
+            </div>
 
-          {/* Consequence Type Toggle */}
-          <div className="flex gap-2 mb-6">
-            <button
-              onClick={() => setConsequenceType('charity')}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
-                consequenceType === 'charity'
-                  ? 'border-orange-500 bg-orange-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <Building className="w-5 h-5" />
-              Charity You Hate
-            </button>
-            <button
-              onClick={() => setConsequenceType('friend')}
-              className={`flex-1 p-4 rounded-xl border-2 transition-all flex items-center justify-center gap-2 ${
-                consequenceType === 'friend'
-                  ? 'border-orange-500 bg-orange-50'
-                  : 'border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              <User className="w-5 h-5" />
-              Friend Who'll Roast You
-            </button>
-          </div>
-
-          {consequenceType === 'charity' ? (
-            <div className="space-y-4">
-              <Input
-                label="Charity/Organization Name"
-                placeholder="Enter the organization name..."
-                value={consequenceTarget}
-                onChange={(e) => setConsequenceTarget(e.target.value)}
-              />
-              <div className="flex flex-wrap gap-2">
-                {SUGGESTED_CHARITIES.map((charity) => (
-                  <button
-                    key={charity}
-                    onClick={() => setConsequenceTarget(charity)}
-                    className="px-3 py-1 text-sm rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
-                  >
-                    {charity}
-                  </button>
-                ))}
+            {consequenceType === 'charity' ? (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="charity">Charity/Organization Name</Label>
+                  <Input
+                    id="charity"
+                    placeholder="Enter the organization name..."
+                    value={consequenceTarget}
+                    onChange={(e) => setConsequenceTarget(e.target.value)}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {SUGGESTED_CHARITIES.map((charity) => (
+                    <Badge
+                      key={charity}
+                      variant="secondary"
+                      className="cursor-pointer hover:bg-secondary/80"
+                      onClick={() => setConsequenceTarget(charity)}
+                    >
+                      {charity}
+                    </Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <Input
-                label="Friend's Email"
-                type="email"
-                placeholder="friend@example.com"
-                value={consequenceTarget}
-                onChange={(e) => setConsequenceTarget(e.target.value)}
-              />
-              <Input
-                label="Roast Message (optional)"
-                placeholder="What should they say when you fail?"
-                value={consequenceMessage}
-                onChange={(e) => setConsequenceMessage(e.target.value)}
-              />
-              <p className="text-sm text-gray-500">
-                Your friend will receive your ${amount} and permission to roast you mercilessly.
-              </p>
-            </div>
-          )}
+            ) : (
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="friendEmail">Friend&apos;s Email</Label>
+                  <Input
+                    id="friendEmail"
+                    type="email"
+                    placeholder="friend@example.com"
+                    value={consequenceTarget}
+                    onChange={(e) => setConsequenceTarget(e.target.value)}
+                    autoComplete="email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="roastMessage">Roast Message (optional)</Label>
+                  <Input
+                    id="roastMessage"
+                    placeholder="What should they say when you fail?"
+                    value={consequenceMessage}
+                    onChange={(e) => setConsequenceMessage(e.target.value)}
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Your friend will receive your ${amount} and permission to roast you mercilessly.
+                </p>
+              </div>
+            )}
 
-          {error && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="p-3 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
+                {error}
+              </div>
+            )}
 
-          <div className="mt-8 flex justify-between">
-            <Button variant="ghost" onClick={() => setStep(2)}>
-              Back
-            </Button>
-            <Button onClick={handleSubmit} disabled={!canProceed()} isLoading={isLoading}>
-              Lock In My Bet
-            </Button>
-          </div>
+            <div className="flex justify-between">
+              <Button variant="ghost" onClick={() => setStep(2)}>
+                Back
+              </Button>
+              <Button onClick={handleSubmit} disabled={!canProceed()} isLoading={isLoading}>
+                Lock In My Bet
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       )}
 
       {/* Summary */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <h3 className="font-medium text-gray-700 mb-2">Your Bet Summary</h3>
-        <ul className="text-sm text-gray-600 space-y-1">
-          <li>Amount: ${amount}</li>
-          <li>Tasks: {tasks.filter(t => t.trim()).length}/3 set</li>
-          <li>Deadline: Tomorrow at 12:00 PM</li>
-          {consequenceTarget && (
-            <li>
-              Consequence: {consequenceType === 'charity' ? 'Donation to' : 'Payment to'} {consequenceTarget}
-            </li>
-          )}
-        </ul>
-      </div>
+      <Card className="mt-6" variant="highlight">
+        <CardContent className="pt-6">
+          <h3 className="font-medium text-foreground mb-2">Your Bet Summary</h3>
+          <ul className="text-sm text-muted-foreground space-y-1">
+            <li>Amount: ${amount}</li>
+            <li>Tasks: {tasks.filter(t => t.trim()).length}/3 set</li>
+            <li>Deadline: Tomorrow at 12:00 PM</li>
+            {consequenceTarget && (
+              <li>
+                Consequence: {consequenceType === 'charity' ? 'Donation to' : 'Payment to'} {consequenceTarget}
+              </li>
+            )}
+          </ul>
+        </CardContent>
+      </Card>
     </div>
   );
 }

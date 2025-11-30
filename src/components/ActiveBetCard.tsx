@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Card from './Card';
+import { Card, CardContent } from '@/components/ui/card';
 import TaskItem from './TaskItem';
 import Countdown from './Countdown';
 import { Trophy, Flame, DollarSign } from 'lucide-react';
@@ -32,7 +32,6 @@ export default function ActiveBetCard({ bet }: ActiveBetCardProps) {
       setCurrentBet(data.bet);
 
       if (data.allComplete) {
-        // Refresh the page to show success state
         router.refresh();
       }
     }
@@ -40,81 +39,87 @@ export default function ActiveBetCard({ bet }: ActiveBetCardProps) {
 
   if (allComplete) {
     return (
-      <Card variant="success" className="text-center py-8">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
-          <Trophy className="w-8 h-8 text-green-600" />
-        </div>
-        <h2 className="text-2xl font-bold text-green-700 mb-2">You Did It!</h2>
-        <p className="text-green-600 mb-4">
-          All 3 tasks completed. Your ${currentBet.amount / 100} is safe!
-        </p>
-        <div className="space-y-2">
-          {currentBet.tasks.map((task) => (
-            <TaskItem key={task.id} task={task} disabled />
-          ))}
-        </div>
+      <Card variant="success" className="text-center">
+        <CardContent className="pt-8 pb-8">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-success/20 flex items-center justify-center">
+            <Trophy className="w-8 h-8 text-success" />
+          </div>
+          <h2 className="text-2xl font-bold text-success mb-2">You Did It!</h2>
+          <p className="text-success/80 mb-4">
+            All 3 tasks completed. Your ${currentBet.amount / 100} is safe!
+          </p>
+          <div className="space-y-2">
+            {currentBet.tasks.map((task) => (
+              <TaskItem key={task.id} task={task} disabled />
+            ))}
+          </div>
+        </CardContent>
       </Card>
     );
   }
 
   if (isExpired && !allComplete) {
     return (
-      <Card variant="danger" className="text-center py-8">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-100 flex items-center justify-center">
-          <Flame className="w-8 h-8 text-red-600" />
-        </div>
-        <h2 className="text-2xl font-bold text-red-700 mb-2">Time's Up!</h2>
-        <p className="text-red-600 mb-4">
-          You didn't complete all tasks. ${currentBet.amount / 100} goes to{' '}
-          <strong>{currentBet.consequence_target}</strong>
-        </p>
-        <div className="space-y-2">
-          {currentBet.tasks.map((task) => (
-            <TaskItem key={task.id} task={task} disabled />
-          ))}
-        </div>
+      <Card variant="destructive" className="text-center">
+        <CardContent className="pt-8 pb-8">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/20 flex items-center justify-center">
+            <Flame className="w-8 h-8 text-destructive" />
+          </div>
+          <h2 className="text-2xl font-bold text-destructive mb-2">Time&apos;s Up!</h2>
+          <p className="text-destructive/80 mb-4">
+            You didn&apos;t complete all tasks. ${currentBet.amount / 100} goes to{' '}
+            <strong>{currentBet.consequence_target}</strong>
+          </p>
+          <div className="space-y-2">
+            {currentBet.tasks.map((task) => (
+              <TaskItem key={task.id} task={task} disabled />
+            ))}
+          </div>
+        </CardContent>
       </Card>
     );
   }
 
   return (
     <Card variant="highlight">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <DollarSign className="w-6 h-6 text-orange-500" />
-          <span className="text-2xl font-bold">${currentBet.amount / 100}</span>
-          <span className="text-gray-500">on the line</span>
+      <CardContent className="pt-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <DollarSign className="w-6 h-6 text-primary" />
+            <span className="text-2xl font-bold text-foreground">${currentBet.amount / 100}</span>
+            <span className="text-muted-foreground">on the line</span>
+          </div>
+          <div className="text-sm text-muted-foreground">
+            {completedCount}/3 done
+          </div>
         </div>
-        <div className="text-sm text-gray-500">
-          {completedCount}/3 done
+
+        <Countdown
+          deadline={currentBet.deadline}
+          onExpire={() => setIsExpired(true)}
+        />
+
+        <div className="mt-6 space-y-3">
+          <h3 className="font-medium text-foreground">Your Tasks:</h3>
+          {currentBet.tasks.map((task) => (
+            <TaskItem
+              key={task.id}
+              task={task}
+              onComplete={handleCompleteTask}
+              disabled={isExpired}
+            />
+          ))}
         </div>
-      </div>
 
-      <Countdown
-        deadline={currentBet.deadline}
-        onExpire={() => setIsExpired(true)}
-      />
-
-      <div className="mt-6 space-y-3">
-        <h3 className="font-medium text-gray-700">Your Tasks:</h3>
-        {currentBet.tasks.map((task) => (
-          <TaskItem
-            key={task.id}
-            task={task}
-            onComplete={handleCompleteTask}
-            disabled={isExpired}
-          />
-        ))}
-      </div>
-
-      <div className="mt-6 p-4 bg-orange-100 rounded-lg">
-        <p className="text-sm text-orange-800">
-          <strong>If you fail:</strong>{' '}
-          {currentBet.consequence_type === 'charity'
-            ? `$${currentBet.amount / 100} goes to ${currentBet.consequence_target}`
-            : `$${currentBet.amount / 100} goes to ${currentBet.consequence_target} (who will definitely roast you)`}
-        </p>
-      </div>
+        <div className="mt-6 p-4 bg-primary/10 rounded-lg border border-primary/20">
+          <p className="text-sm text-foreground">
+            <strong>If you fail:</strong>{' '}
+            {currentBet.consequence_type === 'charity'
+              ? `$${currentBet.amount / 100} goes to ${currentBet.consequence_target}`
+              : `$${currentBet.amount / 100} goes to ${currentBet.consequence_target} (who will definitely roast you)`}
+          </p>
+        </div>
+      </CardContent>
     </Card>
   );
 }
