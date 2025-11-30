@@ -15,8 +15,32 @@ interface AuthFormProps {
 export default function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isGuestLoading, setIsGuestLoading] = useState(false);
   const [error, setError] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
+
+  const handleGuestLogin = async () => {
+    setIsGuestLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('/api/auth/guest', {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create guest account');
+      }
+
+      router.push('/dashboard');
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong');
+      setIsGuestLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,10 +154,30 @@ export default function AuthForm({ mode }: AuthFormProps) {
             </div>
           )}
 
-          <Button type="submit" className="w-full" isLoading={isLoading}>
+          <Button type="submit" className="w-full" isLoading={isLoading} disabled={isGuestLoading}>
             {mode === 'login' ? 'Sign In' : 'Create Account'}
           </Button>
         </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-card px-2 text-muted-foreground">Or</span>
+          </div>
+        </div>
+
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={handleGuestLogin}
+          isLoading={isGuestLoading}
+          disabled={isLoading}
+        >
+          Continue as Guest
+        </Button>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
           {mode === 'login' ? (
