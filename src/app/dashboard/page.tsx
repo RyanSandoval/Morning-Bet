@@ -1,11 +1,25 @@
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth';
-import { getActiveBetForUser, getBetsForUser, getUserById } from '@/lib/db';
 import Header from '@/components/Header';
 import ActiveBetCard from '@/components/ActiveBetCard';
 import BetCreationForm from '@/components/BetCreationForm';
 import BetHistory from '@/components/BetHistory';
 import { Moon, Sun } from 'lucide-react';
+import type { BetWithTasks, User } from '@/types';
+
+// Safe database imports - may fail on Vercel
+let getActiveBetForUser: ((userId: number) => BetWithTasks | undefined) | null = null;
+let getBetsForUser: ((userId: number) => BetWithTasks[]) | null = null;
+let getUserById: ((id: number) => User | undefined) | null = null;
+
+try {
+  const db = require('@/lib/db');
+  getActiveBetForUser = db.getActiveBetForUser;
+  getBetsForUser = db.getBetsForUser;
+  getUserById = db.getUserById;
+} catch {
+  // Database not available (Vercel serverless)
+}
 
 export default async function Dashboard() {
   const session = await getSession();
@@ -14,9 +28,32 @@ export default async function Dashboard() {
     redirect('/login');
   }
 
-  const user = getUserById(session.userId);
-  const activeBet = getActiveBetForUser(session.userId);
-  const allBets = getBetsForUser(session.userId);
+  // Try to get data from database, fallback to session data
+  let user: { name: string; email: string } | null = null;
+  let activeBet: BetWithTasks | undefined = undefined;
+  let allBets: BetWithTasks[] = [];
+
+  try {
+    if (getUserById) {
+      const dbUser = getUserById(session.userId);
+      if (dbUser) {
+        user = { name: dbUser.name, email: dbUser.email };
+      }
+    }
+    if (getActiveBetForUser) {
+      activeBet = getActiveBetForUser(session.userId);
+    }
+    if (getBetsForUser) {
+      allBets = getBetsForUser(session.userId);
+    }
+  } catch {
+    // Database error - use session data
+  }
+
+  // Fallback to session data if database failed
+  if (!user) {
+    user = { name: session.name, email: session.email };
+  }
 
   // Determine if it's morning (time to complete tasks) or evening (time to create bet)
   const hour = new Date().getHours();
@@ -28,7 +65,7 @@ export default async function Dashboard() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header user={user ? { name: user.name, email: user.email } : null} />
+      <Header user={user} />
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Time-based greeting */}
