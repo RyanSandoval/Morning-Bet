@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getCharities, searchCharities } from '@/lib/supabase';
+import { getCharities, searchCharities } from '@/lib/db';
 import type { Charity } from '@/types';
 
 export async function GET(request: Request) {
