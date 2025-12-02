@@ -5,6 +5,14 @@ import type { User, Bet, Task, BetWithTasks } from '@/types';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.morningbet_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.morningbet_SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_morningbet_SUPABASE_ANON_KEY;
 
+// Debug: log which env vars are found
+console.log('Supabase config check:', {
+  hasUrl: !!supabaseUrl,
+  hasKey: !!supabaseKey,
+  urlSource: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'NEXT_PUBLIC_SUPABASE_URL' : process.env.morningbet_SUPABASE_URL ? 'morningbet_SUPABASE_URL' : 'none',
+  keySource: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SERVICE_ROLE_KEY' : process.env.morningbet_SUPABASE_SERVICE_ROLE_KEY ? 'morningbet_SERVICE_ROLE_KEY' : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'ANON_KEY' : 'none',
+});
+
 let supabase: SupabaseClient | null = null;
 
 if (supabaseUrl && supabaseKey) {
@@ -13,7 +21,10 @@ if (supabaseUrl && supabaseKey) {
 
 function getClient(): SupabaseClient {
   if (!supabase) {
-    throw new Error('Supabase not configured. Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY environment variables.');
+    const missing = [];
+    if (!supabaseUrl) missing.push('URL (tried NEXT_PUBLIC_SUPABASE_URL and morningbet_SUPABASE_URL)');
+    if (!supabaseKey) missing.push('KEY (tried SUPABASE_SERVICE_ROLE_KEY, morningbet_SUPABASE_SERVICE_ROLE_KEY, NEXT_PUBLIC_SUPABASE_ANON_KEY)');
+    throw new Error(`Supabase not configured. Missing: ${missing.join(', ')}`);
   }
   return supabase;
 }
