@@ -28,15 +28,24 @@ export async function POST(request: Request) {
         name: user.name,
       },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Guest login error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-    const errorStack = error instanceof Error ? error.stack : undefined;
+    let errorMessage = 'Unknown error';
+    let errorDetails = {};
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    } else if (error && typeof error === 'object') {
+      // Supabase errors are objects with message, code, details properties
+      errorDetails = error;
+      errorMessage = (error as { message?: string }).message || JSON.stringify(error);
+    }
+
     return NextResponse.json(
       {
         error: `Failed to create guest account: ${errorMessage}`,
         details: errorMessage,
-        stack: process.env.NODE_ENV === 'development' ? errorStack : undefined
+        raw: errorDetails
       },
       { status: 500 }
     );
