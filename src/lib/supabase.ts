@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { User, Bet, Task, BetWithTasks } from '@/types';
+import type { User, Bet, Task, BetWithTasks, Charity, Donation } from '@/types';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -59,7 +59,8 @@ export async function createBet(
   consequenceType: 'charity' | 'friend',
   consequenceTarget: string,
   consequenceMessage: string | null,
-  tasks: string[]
+  tasks: string[],
+  charityId: number | null = null
 ): Promise<BetWithTasks> {
   const client = getClient();
 
@@ -73,6 +74,7 @@ export async function createBet(
       consequence_type: consequenceType,
       consequence_target: consequenceTarget,
       consequence_message: consequenceMessage,
+      charity_id: charityId,
     })
     .select()
     .single();
@@ -243,4 +245,162 @@ export async function getExpiredPendingBets(): Promise<BetWithTasks[]> {
       .filter((t: Task) => t.bet_id === bet.id)
       .map((t: Task) => ({ ...t, completed: Boolean(t.completed) })),
   }));
+}
+
+// Charity operations
+export async function getCharities(options?: {
+  category?: Charity['category'];
+  isControversial?: boolean;
+  activeOnly?: boolean;
+}): Promise<Charity[]> {
+  const client = getClient();
+  let query = client.from('charities').select('*');
+
+  if (options?.activeOnly !== false) {
+    query = query.eq('is_active', true);
+  }
+
+  if (options?.category) {
+    query = query.eq('category', options.category);
+  }
+
+  if (options?.isControversial !== undefined) {
+    query = query.eq('is_controversial', options.isControversial);
+  }
+
+  const { data, error } = await query.order('name', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function getCharityById(id: number): Promise<Charity | null> {
+  const { data, error } = await getClient()
+    .from('charities')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error;
+  return data;
+}
+
+export async function createCharity(charityData: {
+  name: string;
+  description: string;
+  category: Charity['category'];
+  logo_url?: string;
+  website_url?: string;
+  ein?: string;
+  stripe_connect_account_id?: string;
+  is_controversial?: boolean;
+}): Promise<Charity> {
+  const { data, error } = await getClient()
+    .from('charities')
+    .insert({
+      name: charityData.name,
+      description: charityData.description,
+      category: charityData.category,
+      logo_url: charityData.logo_url || null,
+      website_url: charityData.website_url || null,
+      ein: charityData.ein || null,
+      stripe_connect_account_id: charityData.stripe_connect_account_id || null,
+      is_controversial: charityData.is_controversial || false,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function searchCharities(searchQuery: string): Promise<Charity[]> {
+  const { data, error } = await getClient()
+    .from('charities')
+    .select('*')
+    .eq('is_active', true)
+    .or(`name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`)
+    .order('name', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+// Donation operations
+export async function createDonation(donationData: {
+  bet_id: number;
+  charity_id: number;
+  user_id: number;
+  amount: number;
+}): Promise<Donation> {
+  const { data, error } = await getClient()
+    .from('donations')
+    .insert(donationData)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function getDonationById(id: number): Promise<Donation | null> {
+  const { data, error } = await getClient()
+    .from('donations')
+    .select('*')
+    .eq('id', id)
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error;
+  return data;
+}
+
+export async function getDonationByBetId(betId: number): Promise<Donation | null> {
+  const { data, error } = await getClient()
+    .from('donations')
+    .select('*')
+    .eq('bet_id', betId)
+    .single();
+
+  if (error && error.code !== 'PGRST116') throw error;
+  return data;
+}
+
+export async function updateDonationStatus(
+  donationId: number,
+  status: Donation['status'],
+  stripeTransferId?: string,
+  failureReason?: string
+): Promise<void> {
+  const { error } = await getClient()
+    .from('donations')
+    .update({
+      status,
+      stripe_transfer_id: stripeTransferId || null,
+      failure_reason: failureReason || null,
+    })
+    .eq('id', donationId);
+
+  if (error) throw error;
+}
+
+export async function getDonationsForUser(userId: number): Promise<Donation[]> {
+  const { data, error } = await getClient()
+    .from('donations')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function getDonationsForCharity(charityId: number): Promise<Donation[]> {
+  const { data, error } = await getClient()
+    .from('donations')
+    .select('*')
+    .eq('charity_id', charityId)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 }

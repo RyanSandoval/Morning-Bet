@@ -6,16 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { DollarSign, Target, AlertTriangle, User, Building } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-const SUGGESTED_CHARITIES = [
-  'Political party you oppose',
-  'NRA (or anti-gun org)',
-  'Flat Earth Society',
-  'Your rival sports team foundation',
-];
+import CharitySelector from '@/components/CharitySelector';
+import type { Charity } from '@/types';
 
 export default function BetCreationForm() {
   const router = useRouter();
@@ -28,6 +22,7 @@ export default function BetCreationForm() {
   const [consequenceType, setConsequenceType] = useState<'charity' | 'friend'>('charity');
   const [consequenceTarget, setConsequenceTarget] = useState('');
   const [consequenceMessage, setConsequenceMessage] = useState('');
+  const [selectedCharity, setSelectedCharity] = useState<Charity | null>(null);
 
   const updateTask = (index: number, value: string) => {
     const newTasks = [...tasks];
@@ -47,8 +42,13 @@ export default function BetCreationForm() {
           amount,
           tasks: tasks.filter(t => t.trim()),
           consequence_type: consequenceType,
-          consequence_target: consequenceTarget,
+          consequence_target: consequenceType === 'charity' && selectedCharity
+            ? selectedCharity.name
+            : consequenceTarget,
           consequence_message: consequenceMessage || undefined,
+          charity_id: consequenceType === 'charity' && selectedCharity
+            ? selectedCharity.id
+            : undefined,
         }),
       });
 
@@ -74,6 +74,9 @@ export default function BetCreationForm() {
       case 2:
         return tasks.filter(t => t.trim()).length === 3;
       case 3:
+        if (consequenceType === 'charity') {
+          return selectedCharity !== null;
+        }
         return consequenceTarget.trim().length > 0;
       default:
         return false;
@@ -222,29 +225,15 @@ export default function BetCreationForm() {
             {consequenceType === 'charity' ? (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="charity">Charity/Organization Name</Label>
-                  <Input
-                    id="charity"
-                    name="charity"
-                    type="text"
-                    placeholder="Enter the organization name..."
-                    value={consequenceTarget}
-                    onChange={(e) => setConsequenceTarget(e.target.value)}
-                    autoComplete="organization"
+                  <Label>Select a Charity You Hate</Label>
+                  <CharitySelector
+                    value={selectedCharity}
+                    onChange={setSelectedCharity}
                   />
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {SUGGESTED_CHARITIES.map((charity) => (
-                    <Badge
-                      key={charity}
-                      variant="secondary"
-                      className="cursor-pointer hover:bg-secondary/80"
-                      onClick={() => setConsequenceTarget(charity)}
-                    >
-                      {charity}
-                    </Badge>
-                  ))}
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Choose an organization that will motivate you to succeed. Your ${amount} will go to them if you fail!
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -305,9 +294,10 @@ export default function BetCreationForm() {
             <li>Amount: ${amount}</li>
             <li>Tasks: {tasks.filter(t => t.trim()).length}/3 set</li>
             <li>Deadline: Tomorrow at 12:00 PM</li>
-            {consequenceTarget && (
+            {(consequenceType === 'charity' ? selectedCharity : consequenceTarget) && (
               <li>
-                Consequence: {consequenceType === 'charity' ? 'Donation to' : 'Payment to'} {consequenceTarget}
+                Consequence: {consequenceType === 'charity' ? 'Donation to' : 'Payment to'}{' '}
+                {consequenceType === 'charity' ? selectedCharity?.name : consequenceTarget}
               </li>
             )}
           </ul>

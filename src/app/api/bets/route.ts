@@ -10,6 +10,7 @@ const createBetSchema = z.object({
   consequence_type: z.enum(['charity', 'friend']),
   consequence_target: z.string().min(1),
   consequence_message: z.string().optional(),
+  charity_id: z.number().optional(),
 });
 
 export async function GET() {
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { amount, tasks, consequence_type, consequence_target, consequence_message } = result.data;
+    const { amount, tasks, consequence_type, consequence_target, consequence_message, charity_id } = result.data;
 
     // Calculate deadline: noon tomorrow
     const now = new Date();
@@ -67,7 +68,8 @@ export async function POST(request: Request) {
       consequence_type,
       consequence_target,
       consequence_message || null,
-      tasks
+      tasks,
+      charity_id || null
     );
 
     return NextResponse.json({ bet });
