@@ -1,8 +1,9 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { User, Bet, Task, BetWithTasks } from '@/types';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Support both standard names and morningbet_ prefixed names
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.morningbet_SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.morningbet_SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_morningbet_SUPABASE_ANON_KEY;
 
 let supabase: SupabaseClient | null = null;
 
