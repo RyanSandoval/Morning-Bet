@@ -37,6 +37,16 @@ export default function ActiveBetCard({ bet }: ActiveBetCardProps) {
     }
   };
 
+  const handleStartNewBetAfterWin = async () => {
+    // Mark the current bet as won
+    await fetch('/api/bets/close', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ betId: currentBet.id, status: 'won' }),
+    });
+    router.refresh();
+  };
+
   if (allComplete) {
     return (
       <Card variant="success" className="text-center">
@@ -48,15 +58,31 @@ export default function ActiveBetCard({ bet }: ActiveBetCardProps) {
           <p className="text-success/80 mb-4">
             All 3 tasks completed. Your ${currentBet.amount / 100} is safe!
           </p>
-          <div className="space-y-2">
+          <div className="space-y-2 mb-6">
             {currentBet.tasks.map((task) => (
               <TaskItem key={task.id} task={task} disabled />
             ))}
           </div>
+          <button
+            onClick={handleStartNewBetAfterWin}
+            className="w-full py-3 px-4 bg-success hover:bg-success/90 text-success-foreground font-semibold rounded-lg transition-colors"
+          >
+            Start New Bet
+          </button>
         </CardContent>
       </Card>
     );
   }
+
+  const handleStartNewBet = async () => {
+    // Mark the current bet as lost
+    await fetch('/api/bets/close', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ betId: currentBet.id, status: 'lost' }),
+    });
+    router.refresh();
+  };
 
   if (isExpired && !allComplete) {
     return (
@@ -70,11 +96,17 @@ export default function ActiveBetCard({ bet }: ActiveBetCardProps) {
             You didn&apos;t complete all tasks. ${currentBet.amount / 100} goes to{' '}
             <strong>{currentBet.consequence_target}</strong>
           </p>
-          <div className="space-y-2">
+          <div className="space-y-2 mb-6">
             {currentBet.tasks.map((task) => (
               <TaskItem key={task.id} task={task} disabled />
             ))}
           </div>
+          <button
+            onClick={handleStartNewBet}
+            className="w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-colors"
+          >
+            Start New Bet
+          </button>
         </CardContent>
       </Card>
     );
